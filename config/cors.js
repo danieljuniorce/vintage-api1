@@ -16,7 +16,7 @@ module.exports = {
   | Function - Receives the current origin and should return one of the above values.
   |
   */
-  origin: ["vintagestudioo.com", "localhost:3333"],
+  origin: "vintagestudioo.com",
 
   /*
   |--------------------------------------------------------------------------
