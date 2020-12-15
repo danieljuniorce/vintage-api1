@@ -14,7 +14,7 @@ class UserSchema extends Schema {
         .string("photo", 255)
         .nullable()
         .defaultTo(
-          "https://www.flaticon.com/svg/static/icons/svg/599/599305.svg"
+          "https://www.flaticon.com/svg/static/icons/svg/3237/3237472.svg"
         );
       table.timestamps();
     });

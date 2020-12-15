@@ -14,9 +14,20 @@ class SessionController {
       };
     }
 
-    const user = await auth.attempt(username, password);
-
-    return user;
+    try {
+      const user = await auth.attempt(username, password);
+      return {
+        token: user.token,
+        email: verify.email,
+        photo: verify.photo,
+        name: verify.name,
+      };
+    } catch (e) {
+      return {
+        error: "07",
+        msg: "don't authentication",
+      };
+    }
   }
 }
 

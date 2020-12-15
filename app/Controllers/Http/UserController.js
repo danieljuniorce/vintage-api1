@@ -1,7 +1,9 @@
 "use strict";
 const User = use("App/Models/User");
 const Token = use("App/Models/Token");
-const Database = use("Database");
+const Mail = use("App/Models/Mail");
+const Send = use("Mail");
+const Encryption = use("Encryption");
 
 class UserController {
   async index() {
@@ -57,8 +59,27 @@ class UserController {
 
     if (email === emailConfirm) {
       if (password === passwordConfirm) {
-        const user = await User.create({ email, username, password, name });
+        const date = new Date();
 
+        const token = Encryption.encrypt(
+          `${date.getFullYear()} - ${date.getMilliseconds()} - ${date.getHours()} - ${date.getSeconds()} - ${username}`
+        );
+
+        const user = await User.create({ email, username, password, name });
+        await Mail.create({ user_id: user.id, token: token.replace("/") });
+
+        await Send.raw(
+          `<h1> E-mail de confirmações </h1>
+          <a href="http://localhost:3000/confirmar/${token.replace(
+            "/"
+          )}">Clique aqui para confirmar seu E-mail</a>
+          `,
+          (message) => {
+            message.from("no-reply@vintagestudio.com");
+            message.to(email);
+            message.subject(`${user.name} confirmar seu cadastro.`);
+          }
+        );
         return user;
       }
 
@@ -112,6 +133,122 @@ class UserController {
 
     return {
       msg: "user delete",
+    };
+  }
+
+  async confirmEmail({ params, request }) {
+    const { token } = params;
+    const { username } = request.all();
+
+    const user = await User.findBy("username", username);
+    const mail = await Mail.findBy("user_id", user.id);
+
+    if (!user) {
+      return {
+        error: "03",
+        msg: "user don't exist",
+      };
+    }
+
+    if (token === mail.token) {
+      mail.merge({ active: true });
+
+      return await mail.save();
+    }
+
+    return {
+      error: "09",
+      msg: "token invalid",
+    };
+  }
+
+  async sendChangePassword({ params, request }) {
+    const { id } = params;
+    const { email } = request.all();
+
+    const user = await User.findBy("email", email);
+
+    if (!user) {
+      return {
+        error: "03",
+        msg: "user don't exist",
+      };
+    }
+
+    const mail = await Mail.findBy("user_id", id);
+
+    if (mail.change === 1 || mail.change === true) {
+      return await Send.raw(
+        `<h1> E-mail de confirmações </h1>
+        <a href="http://localhost:3000/changepassword/${mail.token}/${id}">Clique aqui para alterar sua senha</a>
+        `,
+        (message) => {
+          message.from("no-reply@vintagestudio.com");
+          message.to(email);
+          message.subject(`${user.name} Modificar senha.`);
+        }
+      );
+    }
+
+    const date = new Date();
+
+    const token = Encryption.encrypt(
+      `${date.getFullYear()} - ${date.getMilliseconds()} - ${date.getHours()} - ${date.getSeconds()} - ${email}`
+    );
+
+    mail.merge({ change: true, token: token.replace("/") });
+    await mail.save();
+
+    await Send.raw(
+      `<h1> E-mail de confirmações </h1>
+      <a href="http://localhost:3000/changepassword/${token.replace(
+        "/"
+      )}/${id}">Clique aqui para alterar sua senha</a>
+      `,
+      (message) => {
+        message.from("no-reply@vintagestudio.com");
+        message.to(email);
+        message.subject(`${user.name} Modificar senha.`);
+      }
+    );
+
+    return {
+      send: "send email",
+    };
+  }
+
+  async changePassword({ params, request }) {
+    const { token, id } = params;
+    const { password, confirmPassword } = request.all();
+
+    if (password === confirmPassword) {
+      const mail = await Mail.findBy("user_id", id);
+
+      if ((mail.token === token && mail.change === 1) || mail.change === true) {
+        const token = Encryption.encrypt(
+          `${date.getFullYear()} - ${date.getMilliseconds()} - ${date.getHours()} - ${date.getSeconds()} - ${email}`
+        );
+        const user = await User.findBy("id", id);
+        mail.merge({ change: false, token: token.replace("/") });
+        await mail.save();
+
+        user.merge({ password });
+        await user.save();
+
+        return {
+          msg: "password modified",
+        };
+      }
+
+      return {
+        error: "09",
+        msg: "token invalid",
+      };
+    }
+
+    return {
+      error: "02",
+      msg: "password diferent",
     };
   }
 }
