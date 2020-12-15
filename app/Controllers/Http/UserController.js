@@ -217,38 +217,76 @@ class UserController {
     };
   }
 
-  async changePassword({ params, request }) {
-    const { token, id } = params;
-    const { password, confirmPassword } = request.all();
+  async changePassword({ request }) {
+    const { password, confirmPassword, token, id } = request.all();
 
     if (password === confirmPassword) {
       const mail = await Mail.findBy("user_id", id);
 
-      if ((mail.token === token && mail.change === 1) || mail.change === true) {
-        const token = Encryption.encrypt(
-          `${date.getFullYear()} - ${date.getMilliseconds()} - ${date.getHours()} - ${date.getSeconds()} - ${email}`
-        );
-        const user = await User.findBy("id", id);
-        mail.merge({ change: false, token: token.replace("/") });
-        await mail.save();
+      if (mail.active === 1 || mail.active === true) {
+        if (mail.change === 1 || mail.change === true) {
+          if (mail.token === token) {
+            const date = new Date();
+            const token = Encryption.encrypt(
+              `${date.getFullYear()} - ${date.getMilliseconds()} - ${date.getHours()} - ${date.getSeconds()} - ${
+                mail.token
+              }`
+            );
+            const user = await User.findBy("id", id);
+            mail.merge({ change: false, token: token.replace("/") });
+            await mail.save();
 
-        user.merge({ password });
-        await user.save();
+            user.merge({ password });
+            await user.save();
+
+            return {
+              msg: "password modified",
+            };
+          }
+
+          return {
+            error: "09",
+            msg: "token invalid",
+          };
+        }
 
         return {
-          msg: "password modified",
+          error: "10",
+          msg: "don't authorization for change password",
         };
       }
 
       return {
-        error: "09",
-        msg: "token invalid",
+        error: "08",
+        msg: "don't active account",
       };
     }
 
     return {
       error: "02",
       msg: "password diferent",
+    };
+  }
+
+  async sendActiveAgain({ params }) {
+    const { id } = params;
+
+    const user = await User.findBy("id", id);
+    const mail = await Mail.findBy("user_id", id);
+
+    await Send.raw(
+      `<h1> E-mail de confirmações </h1>
+      <a href="http://localhost:3000/confirmar/${mail.token}">Clique aqui para confirmar seu E-mail</a>
+      `,
+      (message) => {
+        message.from("danieljuniorce@hotmail.com");
+        message.to(user.email);
+        message.subject(`${user.name} confirmar seu cadastro.`);
+      }
+    );
+
+    return {
+      msg: "send email the for active account again",
     };
   }
 }
