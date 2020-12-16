@@ -66,7 +66,7 @@ class UserController {
         );
 
         const user = await User.create({ email, username, password, name });
-        await Mail.create({ user_id: user.id, token: token.replace("/") });
+        await Mail.create({ user_id: user.id, token: token.replace("/", ".") });
 
         await Send.raw(
           `<h1> E-mail de confirmações </h1>
@@ -200,9 +200,10 @@ class UserController {
 
     await Send.raw(
       `<h1> E-mail de confirmações </h1>
-      <a href="https://vintagestudioo.com/mudar-senha/${token.replace("/")}/${
-        user.id
-      }">Clique aqui para alterar sua senha</a>
+      <a href="https://vintagestudioo.com/mudar-senha/${token.replace(
+        "/",
+        "."
+      )}/${user.id}">Clique aqui para alterar sua senha</a>
       `,
       (message) => {
         message.from("no-reply@vintagestudio.com");
@@ -232,7 +233,7 @@ class UserController {
               }`
             );
             const user = await User.findBy("id", id);
-            mail.merge({ change: false, token: token.replace("/") });
+            mail.merge({ change: false, token: token.replace("/", ".") });
             await mail.save();
 
             user.merge({ password });
