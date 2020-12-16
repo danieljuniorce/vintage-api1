@@ -70,7 +70,7 @@ class UserController {
 
         await Send.raw(
           `<h1> E-mail de confirmações </h1>
-          <a href="http://localhost:3000/confirmar/${token.replace(
+          <a href="https://vintagestudioo.com/confirmar/${token.replace(
             "/"
           )}">Clique aqui para confirmar seu E-mail</a>
           `,
@@ -179,7 +179,7 @@ class UserController {
     if (mail.change === 1 || mail.change === true) {
       return await Send.raw(
         `<h1> E-mail de confirmações </h1>
-        <a href="http://localhost:3000/mudar-senha/${mail.token}/${user.id}">Clique aqui para alterar sua senha</a>
+        <a href="https://vintagestudioo.com/mudar-senha/${mail.token}/${user.id}">Clique aqui para alterar sua senha</a>
         `,
         (message) => {
           message.from("no-reply@vintagestudio.com");
@@ -200,7 +200,7 @@ class UserController {
 
     await Send.raw(
       `<h1> E-mail de confirmações </h1>
-      <a href="http://localhost:3000/mudar-senha/${token.replace("/")}/${
+      <a href="https://vintagestudioo.com/mudar-senha/${token.replace("/")}/${
         user.id
       }">Clique aqui para alterar sua senha</a>
       `,
@@ -275,7 +275,7 @@ class UserController {
 
     await Send.raw(
       `<h1> E-mail de confirmações </h1>
-      <a href="http://localhost:3000/confirmar/${mail.token}">Clique aqui para confirmar seu E-mail</a>
+      <a href="https://vintagestudioo.com/confirmar/${mail.token}">Clique aqui para confirmar seu E-mail</a>
       `,
       (message) => {
         message.from("danieljuniorce@hotmail.com");
