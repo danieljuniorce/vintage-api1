@@ -16,8 +16,8 @@ module.exports = {
   | Function - Receives the current origin and should return one of the above values.
   |
   */
-  //"https://www.vintagestudioo.com"
-  origin: true,
+  //
+  origin: "https://www.vintagestudioo.com",
 
   /*
   |--------------------------------------------------------------------------
