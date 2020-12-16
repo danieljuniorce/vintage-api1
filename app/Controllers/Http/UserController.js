@@ -162,8 +162,7 @@ class UserController {
     };
   }
 
-  async sendChangePassword({ params, request }) {
-    const { id } = params;
+  async sendChangePassword({ request }) {
     const { email } = request.all();
 
     const user = await User.findBy("email", email);
@@ -175,12 +174,12 @@ class UserController {
       };
     }
 
-    const mail = await Mail.findBy("user_id", id);
+    const mail = await Mail.findBy("user_id", user.id);
 
     if (mail.change === 1 || mail.change === true) {
       return await Send.raw(
         `<h1> E-mail de confirmações </h1>
-        <a href="http://localhost:3000/changepassword/${mail.token}/${id}">Clique aqui para alterar sua senha</a>
+        <a href="http://localhost:3000/mudar-senha/${mail.token}/${user.id}">Clique aqui para alterar sua senha</a>
         `,
         (message) => {
           message.from("no-reply@vintagestudio.com");
@@ -201,9 +200,9 @@ class UserController {
 
     await Send.raw(
       `<h1> E-mail de confirmações </h1>
-      <a href="http://localhost:3000/changepassword/${token.replace(
-        "/"
-      )}/${id}">Clique aqui para alterar sua senha</a>
+      <a href="http://localhost:3000/mudar-senha/${token.replace("/")}/${
+        user.id
+      }">Clique aqui para alterar sua senha</a>
       `,
       (message) => {
         message.from("no-reply@vintagestudio.com");
@@ -269,10 +268,10 @@ class UserController {
   }
 
   async sendActiveAgain({ params }) {
-    const { id } = params;
+    const { username } = params;
 
-    const user = await User.findBy("id", id);
-    const mail = await Mail.findBy("user_id", id);
+    const user = await User.findBy("username", username);
+    const mail = await Mail.findBy("user_id", user.id);
 
     await Send.raw(
       `<h1> E-mail de confirmações </h1>

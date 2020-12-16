@@ -29,6 +29,6 @@ Route.put("/user/:id", "UserController.update").middleware("auth");
 Route.delete("/user/:id", "UserController.destroy").middleware("auth");
 
 Route.post("/confirm/:token", "UserController.confirmEmail");
-Route.post("/sendchangepassword/:id", "UserController.sendChangePassword");
+Route.post("/sendchangepassword", "UserController.sendChangePassword");
 Route.post("/changepassword", "UserController.changePassword");
-Route.post("/sendactive/:id", "UserController.sendActiveAgain");
+Route.post("/sendactive/:username", "UserController.sendActiveAgain");
