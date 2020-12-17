@@ -32,3 +32,7 @@ Route.post("/confirm/:token", "UserController.confirmEmail");
 Route.post("/sendchangepassword", "UserController.sendChangePassword");
 Route.post("/changepassword", "UserController.changePassword");
 Route.post("/sendactive/:username", "UserController.sendActiveAgain");
+
+Route.resource("/vintageroleplay", "VintageRoleplayController").middleware(
+  "auth"
+);
