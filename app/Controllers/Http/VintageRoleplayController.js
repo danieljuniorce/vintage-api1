@@ -9,31 +9,19 @@ const { SHA384 } = require("crypto-js");
 /** @typedef {import('@adonisjs/framework/src/Response')} Response */
 /** @typedef {import('@adonisjs/framework/src/View')} View */
 
-/**
- * Resourceful controller for interacting with vintagerolepays
- */
 class VintageRoleplayController {
   /**
    * Show a list of all vintagerolepays.
    * GET vintagerolepays
-   *
    * @param {object} ctx
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async index({ request, response, view }) {}
-
-  /**
-   * Render a form to be used for creating a new vintagerolepay.
-   * GET vintagerolepays/create
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async create({ request, response, view }) {}
+  async index() {
+    const vintageRoleplayAccount = await VintageRoleplay.all();
+    return vintageRoleplayAccount;
+  }
 
   /**
    * Create/save a new vintagerolepay.
@@ -84,7 +72,7 @@ class VintageRoleplayController {
         vintageRoleplayAccount.surname
       }, sejá bem-vindo ao Vintage Roleplay</h3>
         <p>Discord ID: ${vintageRoleplayAccount.discordid}</p>
-        <p>Sexo: ${vintageRoleplayAccount.sex ? "Mulher" : "Homem"}</p>
+        <p>Sexo: ${vintageRoleplayAccount.sex ? "Homem" : "Mulher"}</p>
         <p>Vida: 100</p>
         <p>Dinheiro na Carteira: 100</p>
         <p>Dinheiro no Banco: 5000</p>
@@ -113,18 +101,34 @@ class VintageRoleplayController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async show({ params, request, response, view }) {}
+  async show({ params, request }) {
+    const { id } = params;
+    const username = request.header("username");
 
-  /**
-   * Render a form to update an existing vintagerolepay.
-   * GET vintagerolepays/:id/edit
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async edit({ params, request, response, view }) {}
+    const user = await User.findBy("username", username);
+    const vintageRoleplayAccount = await VintageRoleplay.findBy("id", id);
+
+    if (!user) {
+      return {
+        error: "03",
+        msg: "user don't exist",
+      };
+    } else if (!vintageRoleplayAccount) {
+      return {
+        error: "14",
+        msg: "person don't exist",
+      };
+    }
+
+    if (user.id === vintageRoleplayAccount.user_id) {
+      return vintageRoleplayAccount;
+    }
+
+    return {
+      error: "15",
+      msg: "person don't exact id",
+    };
+  }
 
   /**
    * Update vintagerolepay details.
@@ -134,7 +138,40 @@ class VintageRoleplayController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async update({ params, request, response }) {}
+  async update({ params, request }) {
+    const { id } = params;
+    const username = request.header("username");
+    const data = request.all();
+
+    const user = await User.findBy("username", username);
+    const vintageRoleplayAccount = await VintageRoleplay.findBy("id", id);
+
+    if (!user) {
+      return {
+        error: "03",
+        msg: "user don't exist",
+      };
+    } else if (!vintageRoleplayAccount) {
+      return {
+        error: "14",
+        msg: "person don't exist",
+      };
+    }
+
+    if (vintageRoleplayAccount.user_id === user.id) {
+      vintageRoleplayAccount.merge(data);
+      await vintageRoleplayAccount.save();
+
+      return {
+        msg: "update info",
+      };
+    }
+
+    return {
+      error: "15",
+      msg: "person don't exact id",
+    };
+  }
 
   /**
    * Delete a vintagerolepay with id.
@@ -144,7 +181,53 @@ class VintageRoleplayController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async destroy({ params, request, response }) {}
+  async destroy({ params, request }) {
+    const { id } = params;
+    const username = request.header("username");
+
+    const user = await User.findBy("username", username);
+    const vintageRoleplayAccount = await VintageRoleplay.findBy("id", id);
+
+    if (!user) {
+      return {
+        error: "03",
+        msg: "user don't exist",
+      };
+    } else if (!vintageRoleplayAccount) {
+      return {
+        error: "14",
+        msg: "person don't exist",
+      };
+    }
+
+    if (user.id === vintageRoleplayAccount.user_id) {
+      await Send.raw(
+        `<h3>Olá ${vintageRoleplayAccount.name} ${vintageRoleplayAccount.surname} foi deletada com sucesso!</h3>
+          <p>Discord ID: ${vintageRoleplayAccount.discordid}</p>
+          <p>Dinheiro na Carteira: 100</p>
+          <p>Dinheiro no Banco: 5000</p>
+          <p>Ponto de Vantagem: 1000</p>
+          <br/>
+          `,
+        (message) => {
+          message.from("no-reply@vintagestudioo.com");
+          message.to(user.email);
+          message.subject(`O seu personagem foi deletado do Vintage Roleplay.`);
+        }
+      );
+
+      await vintageRoleplayAccount.delete();
+
+      return {
+        msg: "user delete",
+      };
+    }
+
+    return {
+      error: "15",
+      msg: "person don't exact id",
+    };
+  }
 }
 
 module.exports = VintageRoleplayController;

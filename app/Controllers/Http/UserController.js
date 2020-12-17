@@ -2,6 +2,7 @@
 const User = use("App/Models/User");
 const Token = use("App/Models/Token");
 const Mail = use("App/Models/Mail");
+const VintageRoleplay = use("App/Models/VintageRoleplay");
 const Send = use("Mail");
 const Encryption = use("Encryption");
 
@@ -123,6 +124,9 @@ class UserController {
 
     const mail = await Mail.findBy("user_id", id);
     await mail.delete();
+
+    const vintageRoleplay = await VintageRoleplay.findBy("user_id", user.id);
+    await vintageRoleplay.delete();
 
     const user = await User.findBy("id", id);
 
