@@ -195,7 +195,7 @@ class UserController {
       `${date.getFullYear()} - ${date.getMilliseconds()} - ${date.getHours()} - ${date.getSeconds()} - ${email}`
     );
 
-    mail.merge({ change: true, token: token.replace("/") });
+    mail.merge({ change: true, token: token.replace("/", ".") });
     await mail.save();
 
     await Send.raw(
