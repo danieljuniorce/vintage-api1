@@ -32,28 +32,24 @@ class VintageRoleplayController {
    * @param {Response} ctx.response
    */
   async store({ request }) {
-    const {
-      name,
-      surname,
-      password,
-      serial,
-      discordid,
-      sex,
-      username,
-    } = request.all();
+    const { name, surname, password, serial, discordid, sex } = request.all();
+    const username = request.header("username");
 
     const user = await User.findBy("username", username);
-    const vintageRoleplayVerify = await VintageRoleplay.findBy(
-      "user_id",
-      user.id
-    );
 
     if (!user) {
       return {
         error: "03",
         msg: "user don't exist",
       };
-    } else if (vintageRoleplayVerify) {
+    }
+
+    const vintageRoleplayVerify = await VintageRoleplay.findBy(
+      "user_id",
+      user.id
+    );
+
+    if (vintageRoleplayVerify) {
       return { error: "13", msg: "person exist" };
     }
 
