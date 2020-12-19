@@ -2,6 +2,7 @@
 const User = use("App/Models/User");
 const Token = use("App/Models/Token");
 const Mail = use("App/Models/Mail");
+const VintageRoleplay = use("App/Models/VintageRoleplay");
 const Send = use("Mail");
 const Encryption = use("Encryption");
 
@@ -66,16 +67,17 @@ class UserController {
         );
 
         const user = await User.create({ email, username, password, name });
-        await Mail.create({ user_id: user.id, token: token.replace("/", ".") });
+        await Mail.create({ user_id: user.id, token: token.replace("/", "") });
 
         await Send.raw(
           `<h1> E-mail de confirmações </h1>
           <a href="https://vintagestudioo.com/confirmar/${token.replace(
-            "/"
+            "/",
+            ""
           )}">Clique aqui para confirmar seu E-mail</a>
           `,
           (message) => {
-            message.from("no-reply@vintagestudio.com");
+            message.from("no-reply@vintagestudioo.com");
             message.to(email);
             message.subject(`${user.name} confirmar seu cadastro.`);
           }
@@ -117,8 +119,14 @@ class UserController {
   async destroy({ params }) {
     const { id } = params;
 
-    const token = await Token.findBy("id", id);
+    const token = await Token.findBy("user_id", id);
     await token.delete();
+
+    const mail = await Mail.findBy("user_id", id);
+    await mail.delete();
+
+    const vintageRoleplay = await VintageRoleplay.findBy("user_id", user.id);
+    await vintageRoleplay.delete();
 
     const user = await User.findBy("id", id);
 
@@ -195,14 +203,14 @@ class UserController {
       `${date.getFullYear()} - ${date.getMilliseconds()} - ${date.getHours()} - ${date.getSeconds()} - ${email}`
     );
 
-    mail.merge({ change: true, token: token.replace("/", ".") });
+    mail.merge({ change: true, token: token.replace("/", "") });
     await mail.save();
 
     await Send.raw(
       `<h1> E-mail de confirmações </h1>
       <a href="https://vintagestudioo.com/mudar-senha/${token.replace(
         "/",
-        "."
+        ""
       )}/${user.id}">Clique aqui para alterar sua senha</a>
       `,
       (message) => {
@@ -233,7 +241,7 @@ class UserController {
               }`
             );
             const user = await User.findBy("id", id);
-            mail.merge({ change: false, token: token.replace("/", ".") });
+            mail.merge({ change: false, token: token.replace("/", "") });
             await mail.save();
 
             user.merge({ password });
