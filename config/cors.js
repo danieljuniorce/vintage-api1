@@ -17,7 +17,7 @@ module.exports = {
   |
   */
   //"https://www.vintagestudioo.com"
-  origin: true,
+  origin: "https://www.vintagestudioo.com",
 
   /*
   |--------------------------------------------------------------------------
