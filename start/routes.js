@@ -36,3 +36,7 @@ Route.post("/sendactive/:username", "UserController.sendActiveAgain");
 Route.resource("/vintageroleplay", "VintageRoleplayController").middleware(
   "auth"
 );
+Route.post(
+  "/vintageroleplay/changepassword/:id",
+  "VintageRoleplayController.changePassword"
+).middleware("auth");

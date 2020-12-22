@@ -3,7 +3,8 @@
 const VintageRoleplay = use("App/Models/VintageRoleplay");
 const User = use("App/Models/User");
 const Send = use("Mail");
-const { SHA384 } = require("crypto-js");
+const Database = use("Database");
+const { SHA1 } = require("crypto-js");
 
 /** @typedef {import('@adonisjs/framework/src/Request')} Request */
 /** @typedef {import('@adonisjs/framework/src/Response')} Response */
@@ -57,7 +58,7 @@ class VintageRoleplayController {
       user_id: user.id,
       name,
       surname,
-      password: SHA384(password).toString(),
+      password: SHA1(password).toString(),
       serial,
       discordid,
       sex,
@@ -228,6 +229,46 @@ class VintageRoleplayController {
       error: "15",
       msg: "person don't exact id",
     };
+  }
+
+  /**
+   * Delete a vintagerolepay with id.
+   * DELETE vintagerolepays/:id
+   *
+   * @param {object} ctx
+   * @param {Request} ctx.request
+   * @param {Response} ctx.response
+   */
+
+  async changePassword({ params, request }) {
+    const { id } = params;
+    const { passwordActual, password } = request.all();
+    const username = request.header("username");
+
+    const user = await User.findBy("username", username);
+    const vintageRoleplayAccount = await VintageRoleplay.findBy("id", id);
+
+    if (!user) {
+      return {
+        error: "03",
+        msg: "user don't exist",
+      };
+    } else if (!vintageRoleplayAccount) {
+      return {
+        error: "14",
+        msg: "person don't exist",
+      };
+    }
+
+    const updatePassword = await Database.from("vintage_roleplays")
+      .where({ id: parseInt(id), password: SHA1(passwordActual).toString() })
+      .update({ password: SHA1(password).toString() });
+
+    if (updatePassword) {
+      return true;
+    }
+
+    return false;
   }
 }
 
