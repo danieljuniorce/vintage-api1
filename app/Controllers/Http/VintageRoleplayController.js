@@ -4,7 +4,7 @@ const VintageRoleplay = use("App/Models/VintageRoleplay");
 const User = use("App/Models/User");
 const Send = use("Mail");
 const Database = use("Database");
-const { SHA1 } = require("crypto-js");
+const { MD5 } = require("crypto-js");
 
 /** @typedef {import('@adonisjs/framework/src/Request')} Request */
 /** @typedef {import('@adonisjs/framework/src/Response')} Response */
@@ -58,7 +58,7 @@ class VintageRoleplayController {
       user_id: user.id,
       name,
       surname,
-      password: SHA1(password).toString(),
+      password: MD5(password).toString(),
       serial,
       discordid,
       sex,
@@ -261,8 +261,8 @@ class VintageRoleplayController {
     }
 
     const updatePassword = await Database.from("vintage_roleplays")
-      .where({ id: parseInt(id), password: SHA1(passwordActual).toString() })
-      .update({ password: SHA1(password).toString() });
+      .where({ id: parseInt(id), password: MD5(passwordActual).toString() })
+      .update({ password: MD5(password).toString() });
 
     if (updatePassword) {
       return true;
